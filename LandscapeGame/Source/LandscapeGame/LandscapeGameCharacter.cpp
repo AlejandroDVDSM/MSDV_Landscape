@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Public/InteractableObject.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -52,12 +53,42 @@ ALandscapeGameCharacter::ALandscapeGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	isInRangeToInteract = false;
 }
 
 void ALandscapeGameCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnBeginOverlap);
+	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnEndOverlap);
+
+	for (auto rock : Rocks)
+	{
+		rock->bHiddenEdLevel = true;
+	}
+}
+
+void ALandscapeGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cast<AInteractableObject>(OtherActor))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("Player IS NOW in range to interact with the object"));
+		isInRangeToInteract = true;
+	}
+}
+
+void ALandscapeGameCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (Cast<AInteractableObject>(OtherActor))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, TEXT("Player IS NOT in range to interact with the object"));
+		isInRangeToInteract = false;
+	}
+		
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -86,6 +117,9 @@ void ALandscapeGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALandscapeGameCharacter::Look);
+
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ALandscapeGameCharacter::Interact);
 	}
 	else
 	{
@@ -97,7 +131,7 @@ void ALandscapeGameCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
@@ -128,3 +162,17 @@ void ALandscapeGameCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+void ALandscapeGameCharacter::Interact(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Yellow, TEXT("PRESS E!"));
+
+	if (isInRangeToInteract)
+	{
+		enablePowers = true;
+		for (auto rock : Rocks)
+		{
+		}
+	}
+}
+
