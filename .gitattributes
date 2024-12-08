@@ -1,3 +1,0 @@
-LandscapeGame/Content/Fab/** filter=lfs diff=lfs merge=lfs -text
-LandscapeGame/Content/PN_interactiveSpruceForest/** filter=lfs diff=lfs merge=lfs -text
-LandscapeGame/Content/Characters/** filter=lfs diff=lfs merge=lfs -text
