@@ -15,6 +15,8 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+DECLARE_MULTICAST_DELEGATE(FAcquirePowers)
+
 UCLASS(config=Game)
 class ALandscapeGameCharacter : public ACharacter
 {
@@ -51,9 +53,10 @@ class ALandscapeGameCharacter : public ACharacter
 public:
 	ALandscapeGameCharacter();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hidden Path")
-	//TArray<UStaticMesh*> Rocks;
-	TArray<AActor*> Rocks;
+	FAcquirePowers OnPowersAcquired;
+	
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hidden Path")
+	// TArray<AActor*> Rocks;
 
 protected:
 	/** Called for movement input */

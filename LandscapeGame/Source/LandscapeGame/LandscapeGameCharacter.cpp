@@ -56,6 +56,12 @@ ALandscapeGameCharacter::ALandscapeGameCharacter()
 	isInRangeToInteract = false;
 }
 
+// bool ALandscapeGameCharacter::HasPower()
+// {
+// 	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("TEST"));
+// 	return true;
+// }
+
 void ALandscapeGameCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -64,10 +70,9 @@ void ALandscapeGameCharacter::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnEndOverlap);
 
-	for (auto rock : Rocks)
+	/*for (auto rock : Rocks)
 	{
-		rock->bHiddenEdLevel = true;
-	}
+	}*/
 }
 
 void ALandscapeGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -90,6 +95,7 @@ void ALandscapeGameCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedCompon
 	}
 		
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -170,9 +176,10 @@ void ALandscapeGameCharacter::Interact(const FInputActionValue& Value)
 	if (isInRangeToInteract)
 	{
 		enablePowers = true;
-		for (auto rock : Rocks)
+		OnPowersAcquired.Broadcast();
+		/*for (auto rock : Rocks)
 		{
-		}
+		}*/
 	}
 }
 
