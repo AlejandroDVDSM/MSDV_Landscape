@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Portal.h"
 #include "Public/InteractableObject.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -54,6 +55,8 @@ ALandscapeGameCharacter::ALandscapeGameCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 	isInRangeToInteract = false;
+	arePowersEnabled = false;
+	hasReachedPortal = false;
 }
 
 // bool ALandscapeGameCharacter::HasPower()
@@ -69,19 +72,32 @@ void ALandscapeGameCharacter::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ALandscapeGameCharacter::OnEndOverlap);
-
-	/*for (auto rock : Rocks)
-	{
-	}*/
 }
 
 void ALandscapeGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Yellow, TEXT("COLLISION!"));
+	// If the character overlaps with the interactable object trigger it means that it is in range to interact with it
 	if (Cast<AInteractableObject>(OtherActor))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("Player IS NOW in range to interact with the object"));
 		isInRangeToInteract = true;
+		return;
+	}
+	
+	// If the character overlaps with the portal object, it means that it has reached the portal so the endgame hud should become visible
+	if (Cast<APortal>(OtherActor))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Blue, TEXT("Player has reached the portal"));
+		hasReachedPortal = true;
+
+		if (CanEscape())
+		{ // Disable movement
+			APlayerController* PlayerController = Cast<APlayerController>(GetController());
+			PlayerController->GetPawn()->DisableInput(PlayerController);
+		}
+		return;
 	}
 }
 
@@ -92,10 +108,26 @@ void ALandscapeGameCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, TEXT("Player IS NOT in range to interact with the object"));
 		isInRangeToInteract = false;
+		return;
 	}
-		
+
+	if (Cast<APortal>(OtherActor))
+	{
+		hasReachedPortal = false;
+		return;
+	}
 }
 
+bool ALandscapeGameCharacter::IsInRangeToInteract()
+{
+	return isInRangeToInteract;
+}
+
+bool ALandscapeGameCharacter::CanEscape()
+{
+	// GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, FString::Printf(TEXT("hasReachedPortal: %s --- arePowersEnabled: %s"), hasReachedPortal, arePowersEnabled));
+	return hasReachedPortal && arePowersEnabled;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -113,7 +145,6 @@ void ALandscapeGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -175,11 +206,8 @@ void ALandscapeGameCharacter::Interact(const FInputActionValue& Value)
 
 	if (isInRangeToInteract)
 	{
-		enablePowers = true;
+		arePowersEnabled = true;
 		OnPowersAcquired.Broadcast();
-		/*for (auto rock : Rocks)
-		{
-		}*/
 	}
 }
 

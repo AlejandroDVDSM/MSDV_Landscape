@@ -7,11 +7,13 @@
 #include "Logging/LogMacros.h"
 #include "LandscapeGameCharacter.generated.h"
 
+
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -54,9 +56,12 @@ public:
 	ALandscapeGameCharacter();
 
 	FAcquirePowers OnPowersAcquired;
-	
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hidden Path")
-	// TArray<AActor*> Rocks;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsInRangeToInteract();
+
+	UFUNCTION(BlueprintCallable)
+	bool CanEscape();
 
 protected:
 	/** Called for movement input */
@@ -98,6 +103,6 @@ public:
 
 private:
 	bool isInRangeToInteract;
-
-	bool enablePowers;
+	bool arePowersEnabled;
+	bool hasReachedPortal;
 };
