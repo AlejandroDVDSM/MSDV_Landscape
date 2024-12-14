@@ -54,16 +54,7 @@ ALandscapeGameCharacter::ALandscapeGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
-	isInRangeToInteract = false;
-	arePowersEnabled = false;
-	hasReachedPortal = false;
 }
-
-// bool ALandscapeGameCharacter::HasPower()
-// {
-// 	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("TEST"));
-// 	return true;
-// }
 
 void ALandscapeGameCharacter::BeginPlay()
 {
@@ -77,11 +68,11 @@ void ALandscapeGameCharacter::BeginPlay()
 void ALandscapeGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Yellow, TEXT("COLLISION!"));
+	// GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Yellow, TEXT("COLLISION!"));
+	
 	// If the character overlaps with the interactable object trigger it means that it is in range to interact with it
 	if (Cast<AInteractableObject>(OtherActor))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Green, TEXT("Player IS NOW in range to interact with the object"));
 		isInRangeToInteract = true;
 		return;
 	}
@@ -89,7 +80,6 @@ void ALandscapeGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp
 	// If the character overlaps with the portal object, it means that it has reached the portal so the endgame hud should become visible
 	if (Cast<APortal>(OtherActor))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Blue, TEXT("Player has reached the portal"));
 		hasReachedPortal = true;
 
 		if (CanEscape())
@@ -106,7 +96,6 @@ void ALandscapeGameCharacter::OnEndOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	if (Cast<AInteractableObject>(OtherActor))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, TEXT("Player IS NOT in range to interact with the object"));
 		isInRangeToInteract = false;
 		return;
 	}
@@ -125,7 +114,6 @@ bool ALandscapeGameCharacter::IsInRangeToInteract()
 
 bool ALandscapeGameCharacter::CanEscape()
 {
-	// GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Red, FString::Printf(TEXT("hasReachedPortal: %s --- arePowersEnabled: %s"), hasReachedPortal, arePowersEnabled));
 	return hasReachedPortal && arePowersEnabled;
 }
 
@@ -202,8 +190,6 @@ void ALandscapeGameCharacter::Look(const FInputActionValue& Value)
 
 void ALandscapeGameCharacter::Interact(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Yellow, TEXT("PRESS E!"));
-
 	if (isInRangeToInteract)
 	{
 		arePowersEnabled = true;

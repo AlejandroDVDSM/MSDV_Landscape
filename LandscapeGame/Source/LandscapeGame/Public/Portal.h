@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Portal.generated.h"
 
+class ALandscapeGameCharacter;
+
 UCLASS()
 class LANDSCAPEGAME_API APortal : public AActor
 {
@@ -16,9 +18,13 @@ public:
 	APortal();
 
 protected:
+	void EnablePortal();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+private:
+	ALandscapeGameCharacter* LandscapeGameCharacter;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

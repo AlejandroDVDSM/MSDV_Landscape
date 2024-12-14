@@ -3,6 +3,8 @@
 
 #include "LandscapeGame/Public/InteractableObject.h"
 
+#include "LandscapeGame/LandscapeGameCharacter.h"
+
 // Sets default values
 AInteractableObject::AInteractableObject()
 {
@@ -15,7 +17,15 @@ AInteractableObject::AInteractableObject()
 void AInteractableObject::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LandscapeGameCharacter = Cast<ALandscapeGameCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	LandscapeGameCharacter->OnPowersAcquired.AddUObject(this, &AInteractableObject::Disappear);
 	
+}
+
+void AInteractableObject::Disappear()
+{
+	Destroy();
 }
 
 // Called every frame

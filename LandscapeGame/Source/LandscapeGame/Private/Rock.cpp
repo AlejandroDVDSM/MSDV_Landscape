@@ -40,7 +40,7 @@ void ARock::TurnVisible()
 	{
 		StaticMeshComponent->SetVisibility(true);
 		SetActorHiddenInGame(false);  // Ensure the actor itself is not hidden
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);  // Disable collision
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);  // Enable collision
 	}
 }
 
